@@ -43,6 +43,7 @@ export class SocketGateway implements OnGatewayDisconnect {
     } else {
       Logger.log(`client  fails to join to the room: ${roomId}-room`);
       client.error('invalid room id');
+      client.disconnect(true);
     }
   }
 
