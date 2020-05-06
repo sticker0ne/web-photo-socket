@@ -39,7 +39,7 @@ export class SocketGateway implements OnGatewayDisconnect {
     if (rooms.hasOwnProperty(roomId)) {
       Logger.log(`client joined to the room: ${roomId}-room`);
       client.join(`${roomId}-room`);
-      this.server.to(`${roomId}-room`).emit('clientJoined', {room: `${roomId}-room`, clientId: client.id});
+      this.server.to(`${roomId}-room`).emit('clientJoined', {roomId: `${roomId}-room`, clientId: client.id});
     } else {
       Logger.log(`client  fails to join to the room: ${roomId}-room`);
       client.error('invalid room id');
@@ -52,6 +52,8 @@ export class SocketGateway implements OnGatewayDisconnect {
       @MessageBody() emitToRoomEvent: EmitToRoomEventEntity,
       @ConnectedSocket() client: Socket,
   ): void {
+    Logger.log('new emitToRoomEvent');
+    Logger.log(JSON.stringify(emitToRoomEvent));
     this.server.to(emitToRoomEvent.roomId).emit(emitToRoomEvent.eventType, {clientId: client.id, payload: emitToRoomEvent.payload});
   }
 }
