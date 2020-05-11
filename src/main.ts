@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {Logger} from '@nestjs/common';
 
-const { APP_PORT, APP_GLOBAL_PREFIX, APP_ENABLE_CORS } = process.env;
+const { APP_PORT, APP_GLOBAL_PREFIX, APP_ENABLE_CORS, APP_HOST } = process.env;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +13,7 @@ async function bootstrap() {
   if (enableCors) {
     app.enableCors();
   }
-  await app.listen(Number(APP_PORT) || 3000);
+  await app.listen(Number(APP_PORT) || 3000, APP_HOST);
 
   Logger.log(
     `application started on: ${await app.getUrl()}${
