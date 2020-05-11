@@ -18,13 +18,18 @@ export class SocketGateway implements OnGatewayDisconnect {
   server: Server;
 
   async handleDisconnect(client: Socket): Promise<void> {
-    Logger.log(`disconnect user: ${client}`);
+    Logger.log(`disconnect user: ${JSON.stringify(client.rooms)}`);
   }
 
   @SubscribeMessage('createRoom')
   private createRoom(
     @ConnectedSocket() client: Socket,
   ): void {
+    // On photograph disconnect
+    client.on('disconnecting', () => {
+      Logger.log(`disconnected photograph: ${client.id}`);
+      this.server.to(`${client.id}-room`).emit('error', {code: 1, msg: 'photograph disconnected'});
+    });
     Logger.log(`created new room, by client with socketId: ${client.id}`);
     client.join(`${client.id}-room`);
     this.server.to(`${client.id}-room`).emit('roomCreated', {roomId: `${client.id}-room`});
@@ -40,6 +45,12 @@ export class SocketGateway implements OnGatewayDisconnect {
       Logger.log(`client joined to the room: ${roomId}-room`);
       client.join(`${roomId}-room`);
       this.server.to(`${roomId}-room`).emit('clientJoined', {roomId: `${roomId}-room`, clientId: client.id});
+
+      // On client disconnect
+      client.on('disconnecting', () => {
+        Logger.log(`disconnected client: ${client.id}`);
+        this.server.to(roomId).emit('clientDisconnect', client.id);
+      });
     } else {
       Logger.log(`client  fails to join to the room: ${roomId}-room`);
       client.error({code: 0, msg: 'invalid room id'});
